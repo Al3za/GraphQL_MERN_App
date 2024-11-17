@@ -5,7 +5,6 @@ query GetUsers { # query name dont need to be GetUsers
   users {
     _id 
     username
-    password
     email
   } # we tells in the query only the data we want, avoiding overfetching
    # for exemple if we dont need password, we delete it from the query so that data ll not be fetched
@@ -30,6 +29,15 @@ query getUser ($id: ID!) { # ID here has to match the type Query ID. (ID is a ty
   }
 }
 `; // we tells in the query only the data we want, avoiding overfetching
+
+export const LOGIN_USER = gql`
+query UserLogin($username:String, $password: String){
+UserLogin(username:$username,password:$password){
+username
+password
+  }
+}
+`
 
 export const ADD_USER = gql`
 mutation addUser($username: String, $password: String, $email: String) { # mutation name can have any name u choose. in here we pass the args first from our client, then to our server

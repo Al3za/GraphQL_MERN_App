@@ -24,6 +24,7 @@ const typeDefs = `#graphql
     email: String
   }
   type Query {
+    UserLogin(username:String,password:String): User
     users: [User]
     user(_id: ID!): User
   }
@@ -54,6 +55,9 @@ const resolvers = {
                 }
                 return res;
             });
+        },
+        UserLogin: (_parent, { username, password } /*String*/, { dataSourses }) => {
+            console.log(username, password, 'args');
         },
     },
     Mutation: {

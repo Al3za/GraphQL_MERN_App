@@ -36,7 +36,7 @@ const GetUsers = () => {
               {/*td stands Table Data for The td element is often used within the tr (table row) element to structure and organize tabular data on a webpage.*/}
               <td>{username}</td>
               <td>{email}</td>
-              <td>{password} </td>
+              {/* <td>{password} </td> */}
             </tr>
           )
         )}

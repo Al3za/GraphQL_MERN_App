@@ -1,6 +1,7 @@
 import { MongoDataSource, MongoDataSourceConfig } from 'apollo-datasource-mongodb';
 import { ObjectId } from 'mongodb';
 import { UserDocument } from '../types';
+import { genSaltSync, hashSync } from "bcrypt-ts";
 
 
 export default class Users extends MongoDataSource<UserDocument> {
@@ -14,6 +15,10 @@ export default class Users extends MongoDataSource<UserDocument> {
         this.loggedInUser = options.loggedInUser// if you wanna get context value to datasouces by super(options)
         this.tok = options.tok;// if you wanna get context value to datasouces
         this.MockurrentUserId = options.MockurrentUserId;
+    };
+
+    loginUser(user: string) { // pretend the user are the name and password of the client
+        console.log(user)
     }
 
     getUsers() {
@@ -35,6 +40,9 @@ export default class Users extends MongoDataSource<UserDocument> {
     }
 
     addUser(username: string, password: string, email: string) {
+        const salt = genSaltSync(10);
+        const hash = hashSync(password, salt);
+        password = hash
         return this.collection.insertMany([{ username, password, email }]); //this.collection.insertMany([{ username, password, email }]);
     }
 }

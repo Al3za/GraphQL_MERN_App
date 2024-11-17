@@ -39,6 +39,12 @@ const resolvers = {
             return dataSourses.users.getUsers();
         },
         user: (_parent, { _id }, { dataSourses }) => {
+            // console.log(_id, dataSourses.MockurrentUserId);
+            // if (_id == dataSourses.MockurrentUserId) {
+            //     console.log("user allowed");
+            // } else {
+            //     console.log("user not allowed");
+            // } working
             return dataSourses.users.getUser(_id)
                 .then((res) => {
                 if (!res) {
@@ -61,12 +67,15 @@ const server = new ApolloServer({
     typeDefs,
     resolvers,
     plugins: [
-        // Proper shutdown for the HTTP server.
+        // Proper/gracefully shutdown for the HTTP server.
         ApolloServerPluginDrainHttpServer({ httpServer }),
         //When all of your requests to the server have received a response and there is no remaining data processing work to be done.
     ],
 });
 await server.start();
+// Apollo Server provides the backend GraphQL API, 
+// while Apollo Client handles the frontend data fetching and state management.
+// This combination allows for efficient, declarative data fetching and a smooth developer experience.
 const mockLoginUser = {
     //_id: '', // we use id: to mock data but in real case we have to use _id and pass not a string but a new ObjectId
     // for exemple if we fetch a user from mongoDB;
@@ -77,14 +86,18 @@ const mockLoginUser = {
 };
 app.use(cors(), json(), expressMiddleware(server, {
     context: async ({ req }) => {
+        console.log(req.headers.authorization.split(" ")[1], 'token');
         const loggedInUser = mockLoginUser; // we mock the current user data and pass it to the dataSource do some user verification
         req.headers.token = 'gschgagasdagghd';
         const tok = req.headers.token;
-        //console.log(req.headers.token, 'token')
+        const MockurrentUserId = req.headers.authorization?.split(" ")[1];
+        // here write middleware data to be passed our dataSource (Users)
         return {
             dataSourses: {
+                // here write middleware data to be pass in our resolvers
+                MockurrentUserId: req.headers.authorization?.split(" ")[1],
                 token: req.headers.token,
-                users: new Users({ modelOrCollection: await UserModel.createCollection(), loggedInUser, tok })
+                users: new Users({ modelOrCollection: await UserModel.createCollection(), loggedInUser, tok, MockurrentUserId })
             },
         };
     },

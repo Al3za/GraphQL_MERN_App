@@ -5,13 +5,15 @@ import { UserDocument } from '../types';
 
 export default class Users extends MongoDataSource<UserDocument> {
 
-    protected loggedInUser: UserDocument
+    protected loggedInUser: UserDocument;
     protected tok: String;
+    protected MockurrentUserId: String | null
 
-    constructor(options: { tok: String, loggedInUser: UserDocument } & MongoDataSourceConfig<UserDocument>) {
+    constructor(options: { MockurrentUserId: String | null, tok: String, loggedInUser: UserDocument } & MongoDataSourceConfig<UserDocument>) {
         super(options)
         this.loggedInUser = options.loggedInUser// if you wanna get context value to datasouces by super(options)
         this.tok = options.tok;// if you wanna get context value to datasouces
+        this.MockurrentUserId = options.MockurrentUserId;
     }
 
     getUsers() {
@@ -20,12 +22,12 @@ export default class Users extends MongoDataSource<UserDocument> {
     }
 
     async getUser(userId: ObjectId) {
-        // if (this.loggedInUser.mockId !== userId.toString()) { // if you wanna check a real user id change to this.loggedInUser._id
-        //     console.log(this.loggedInUser.mockId, " ", userId.toString(), " Not Authorized");
-        // } else {
-        //     console.log("authorized");
-        // }
 
+        // if (userId.toString() === this.MockurrentUserId) {
+        //     console.log("user allowed");
+        // } else {
+        //     console.log("user not allowed");
+        // } working
         // this.loggedInUser._id throw an error because the loggedInUser is of type
         const UserFind = await this.collection.findOne({ _id: new ObjectId(userId) });
         console.log(UserFind)

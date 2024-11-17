@@ -5,15 +5,16 @@ const GetUser = () => {
   let inputId: HTMLInputElement | null = null;
   const [getUser, { loading, error, data }] = useLazyQuery(GET_USER); //The useLazyQuery hook is perfect for executing queries in response to events other than component rendering.
   // normal useQuery calls function executes directly after the react component munt and render
+  //const getUser name can have any name;
   if (loading) return <p>'Submitting...'</p>;
-
+  console.log(data?.user, "single user");
   return (
     <div>
       {error && <p>`Submission error! ${error.message}`</p>}
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          getUser({ variables: { id: inputId?.value } }); // variables will be catched in args in the server
+          getUser({ variables: { id: inputId?.value } }); // variables id will be first catched in queries.ts file and then sent in the server s args
         }}
       >
         <input
@@ -49,4 +50,4 @@ const GetUser = () => {
   );
 };
 
-export default GetUser;
+export default GetUser; //name of the react element has nothing to do with queries and servers endpoint

@@ -44,6 +44,12 @@ const resolvers = {
             return dataSourses.users.getUsers();
         },
         user: (_parent: any, { _id }, { dataSourses }) => {
+            // console.log(_id, dataSourses.MockurrentUserId);
+            // if (_id == dataSourses.MockurrentUserId) {
+            //     console.log("user allowed");
+            // } else {
+            //     console.log("user not allowed");
+            // } working
             return dataSourses.users.getUser(_id)
                 .then((res: UserDocument) => {
                     if (!res) {
@@ -71,6 +77,7 @@ interface MyContext {
     dataSourses?: {
         token: String
         users: Users;
+        MockurrentUserId: String | null;
     }; // seems like the object name and property name doesnt have to match
 }
 
@@ -102,14 +109,18 @@ app.use(
     json(),
     expressMiddleware(server, { // expressMiddleware attach apollo server to express server, and adds features like cors and middleware
         context: async ({ req }) => {
+            console.log(req.headers.authorization.split(" ")[1], 'token')
             const loggedInUser = mockLoginUser; // we mock the current user data and pass it to the dataSource do some user verification
             req.headers.token = 'gschgagasdagghd'
             const tok = req.headers.token;
-            //console.log(req.headers.token, 'token')
+            const MockurrentUserId = req.headers.authorization?.split(" ")[1];
+            // here write middleware data to be passed our dataSource (Users)
             return {
                 dataSourses: {
+                    // here write middleware data to be pass in our resolvers
+                    MockurrentUserId: req.headers.authorization?.split(" ")[1],
                     token: req.headers.token,
-                    users: new Users({ modelOrCollection: await UserModel.createCollection(), loggedInUser, tok })
+                    users: new Users({ modelOrCollection: await UserModel.createCollection(), loggedInUser, tok, MockurrentUserId })
                 },
             }
         },

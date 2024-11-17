@@ -18,7 +18,7 @@ const AddUser = () => {
           e.preventDefault();
           addUser({
             variables: {
-              // variables will be catched in server`s resolvers args
+              // variables will be catched in our queries.ts file and then in server`s resolvers args
               username: inputName?.value,
               password: inputPassword?.value,
               email: inputEmail?.value,

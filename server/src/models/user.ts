@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 const userSchema = new Schema({
     _id: ObjectId,
     username: String,
-    //roles: [String],
+    roles: [String], // working
     //username: { type: String, required: true }, not working
     password: String,
     email: String,

@@ -6,10 +6,15 @@ const UserLogin = () => {
   let inputPassword: HTMLInputElement | null;
   const [VerifyUser, { loading, error, data }] = useLazyQuery(LOGIN_USER);
   if (loading) return <p>'Submitting...'</p>;
-  console.log(data?.user, "Jwt token");
+
+  if (data?.UserLogin.token) {
+    localStorage.setItem("jwt", JSON.stringify(data?.UserLogin.token));
+  }
+  // localStorage.setItem("jwt", JSON.stringify(data?.UserLogin.token));
   return (
     <div>
-      {error && <p>`Submission error! ${error.message}`</p>}
+      {error && <p>`Submission error! ${error.message}`</p>}{" "}
+      {/* u get this error if the query in dataloader server fails */}
       <form
         onSubmit={(e) => {
           e.preventDefault();

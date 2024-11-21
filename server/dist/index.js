@@ -9,7 +9,11 @@ import cors from 'cors';
 import { User as UserModel } from './models/user.js';
 import Users from './dataSources/users.js';
 import pkg from 'body-parser';
+import Jwt from 'jsonwebtoken';
 const { json } = pkg;
+import dotenv from 'dotenv';
+dotenv.config();
+const checkEnv = process.env.JWT_SECRET;
 await mongoose.connect('mongodb://127.0.0.1:27017/ragnemt');
 const app = express();
 // Our httpServer handles incoming requests to our Express app.
@@ -21,25 +25,53 @@ const typeDefs = `#graphql
     _id: ID! #mark (!) means that our server always expects to return a non-null value for this field
     username: String
     password: String
+    roles:[String]!
     email: String
   }
-  type Query {
-    UserLogin(username:String,password:String): User
+
+      type UserToken { #id: String,
+        token: String
+    }
+
+  type Query { 
+  UserLogin(username:String,password:String): UserToken
+   # UserLogin(username: UserLoginInput): UserToken
     users: [User]
     user(_id: ID!): User
   }
+
   type Mutation {
-    addUser(username: String, password: String, email: String): User
+    addUser(username: String, password: String, email: String, roles:[String]): User
   }
 `;
+const verifyJwt = (JwtToken) => {
+    // verify token here;
+    if (JwtToken) {
+        try {
+            const verify = Jwt.verify(JwtToken, process.env.JWT_SECRET);
+            // console.log(verify, 'verify one', typeof verify, 'verify') // Jwt type is object
+            return verify;
+        }
+        catch (error) {
+            // console.log(error, 'erroress')
+            return;
+            // JsonWebTokenError: invalid signature
+            // The error you get when a JWT is wrong writter or expired
+        }
+    }
+};
 const resolvers = {
     Query: {
         users: (_parent, _args, { dataSourses }) => {
+            if (!verifyJwt(dataSourses.Usertoken))
+                throw new GraphQLError('Not authenticated, please log in again');
             //dataSourses = ContextValue
             // console.log(dataSourses.token, 'dataSourses.token')
             return dataSourses.users.getUsers();
         },
         user: (_parent, { _id }, { dataSourses }) => {
+            if (!verifyJwt(dataSourses.Usertoken))
+                throw new GraphQLError('Not authenticated, please log in again');
             // console.log(_id, dataSourses.MockurrentUserId);
             // if (_id == dataSourses.MockurrentUserId) {
             //     console.log("user allowed");
@@ -57,14 +89,19 @@ const resolvers = {
             });
         },
         UserLogin: (_parent, { username, password } /*String*/, { dataSourses }) => {
-            console.log(username, password, 'args');
+            return dataSourses.users.loginUser(username, password);
         },
     },
     Mutation: {
-        addUser: (_parent, { username, password, email }, { dataSourses }) => {
-            return dataSourses.users.addUser(username, password, email)
-                .then((res) => ({ _id: res.insertedIds[0], username, password, email }));
-        }
+        addUser: (_parent, { username, password, email, roles }, { dataSourses }) => {
+            if (!verifyJwt(dataSourses.Usertoken))
+                throw new GraphQLError('Not authenticated, please log in again');
+            return dataSourses.users.addUser(username, password, email, roles)
+                .then((res) => ({ _id: res.insertedIds[0], username, password, email, roles }));
+        },
+        //     UserLogin: (_parent: any, { username, password } /*String*/, { dataSourses }) => {
+        //         return dataSourses.users.loginUser(username, password)
+        //     },
     }
 };
 const server = new ApolloServer({
@@ -84,21 +121,26 @@ const mockLoginUser = {
     //_id: '', // we use id: to mock data but in real case we have to use _id and pass not a string but a new ObjectId
     // for exemple if we fetch a user from mongoDB;
     mockId: 'testes',
+    roles: ['user', 'admin'],
     username: '',
     password: '',
     email: '',
 };
 app.use(cors(), json(), expressMiddleware(server, {
     context: async ({ req }) => {
-        console.log(req.headers.authorization.split(" ")[1], 'token');
+        // console.log(req.headers.authorization.split(" ")[1], 'token')
         const loggedInUser = mockLoginUser; // we mock the current user data and pass it to the dataSource do some user verification
-        req.headers.token = 'gschgagasdagghd';
-        const tok = req.headers.token;
+        // req.headers.token = 'gschgagasdagghd'
+        const tok = 'tokess';
         const MockurrentUserId = req.headers.authorization?.split(" ")[1];
+        // const Usertoken: string | null = req.headers.authorization.split(" ")[1];
+        //console.log(Usertoken, 'UserToken')
+        // if (!verifyJwt(Usertoken)) throw new GraphQLError('Not Logged in');
         // here write middleware data to be passed our dataSource (Users)
         return {
             dataSourses: {
                 // here write middleware data to be pass in our resolvers
+                Usertoken: req.headers.authorization.split(" ")[1],
                 MockurrentUserId: req.headers.authorization?.split(" ")[1],
                 token: req.headers.token,
                 users: new Users({ modelOrCollection: await UserModel.createCollection(), loggedInUser, tok, MockurrentUserId })

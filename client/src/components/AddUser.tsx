@@ -5,9 +5,9 @@ const AddUser = () => {
   let inputName: HTMLInputElement | null;
   let inputPassword: HTMLInputElement | null;
   let inputEmail: HTMLInputElement | null;
+  let inputUser: HTMLInputElement | null;
 
   const [addUser, { loading, error, client }] = useMutation(ADD_USER);
-
   if (loading) return <p>'Submitting...'</p>;
 
   return (
@@ -22,6 +22,7 @@ const AddUser = () => {
               username: inputName?.value,
               password: inputPassword?.value,
               email: inputEmail?.value,
+              roles: inputUser?.value,
             },
             refetchQueries: [{ query: GET_USERS }], // refetch the query once we added data so we see fresh data
             onError: () => client.refetchQueries({ include: [GET_USERS] }),
@@ -48,6 +49,14 @@ const AddUser = () => {
             inputEmail = node; // we can get the input value without having a class name
           }}
           placeholder="Email"
+          required
+        />
+        <input
+          //type="email"
+          ref={(node) => {
+            inputUser = node; // we can get the input value without having a class name
+          }}
+          placeholder="User"
           required
         />
         <button type="submit">Add User</button>

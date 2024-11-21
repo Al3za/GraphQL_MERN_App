@@ -18,8 +18,8 @@ const httpLink = createHttpLink({
 });
 
 const authLink = setContext((_, { headers }) => {
-  // get the authentication token from local storage if it exists
-  const token = "67375be9ac5d68d5cc7b784a"; //localStorage.getItem("token");
+  const getJwt = localStorage.getItem("jwt") || "";
+  const token = getJwt ? JSON.parse(getJwt) : ""; // we parse it to make it work
   // return the headers to the context so httpLink can read them
   return {
     headers: {
@@ -43,3 +43,5 @@ root.render(
     <App />
   </ApolloProvider>
 );
+
+// verksamt

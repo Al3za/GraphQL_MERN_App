@@ -6,7 +6,7 @@ import UserLogin from "./components/LoginUser";
 
 const App = () => {
   const OnChangeTab = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent> | any,
     activeTab: string
   ) => {
     const tabcontent = document.getElementsByClassName("tabcontent");
@@ -25,6 +25,7 @@ const App = () => {
     <>
       USERLOGIN <br />
       <UserLogin />
+      {/* name:ale - pass:milozeus */}
       <div className="tab">
         <button
           className="tablinks active"
@@ -41,7 +42,7 @@ const App = () => {
           User
         </button>
       </div>
-      <div id="Users" className="tabcontent" style={{ display: "none" }}>
+      <div id="Users" className="tabcontent" /*style={{ display: "none" }}*/>
         <h3>Users</h3>
         {/* <UserLogin /> */}
         <AddUser />
